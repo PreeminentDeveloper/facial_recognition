@@ -6,12 +6,14 @@ import 'package:facial_recognition/screens/Home/welcome.dart';
 import 'package:facial_recognition/screens/face_detection/face_page.dart';
 import 'package:facial_recognition/widget/build_drawer.dart';
 import 'package:facial_recognition/widget/custom_button.dart';
+import 'package:facial_recognition/widget/loader.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
 import '../../service/auth.dart';
 
@@ -25,9 +27,8 @@ class ScanStudent extends StatefulWidget {
 class _ScanStudentState extends State<ScanStudent> {
   var scaffoldKey = GlobalKey<ScaffoldState>();
 
-  File? pickedImage;
-  bool _load = false;
-  ImagePicker? imagePicker;
+  XFile? pickedImage;
+  bool loading = false;
   final ImagePicker _picker = ImagePicker();
 
   var imageFile;
@@ -38,42 +39,50 @@ class _ScanStudentState extends State<ScanStudent> {
   bool isFaceDetected = false;
 
   Future pickImage() async {
-    // var awaitImage = await imagePicker?.pickImage(source: ImageSource.gallery);
+    var awaitImage = await _picker.pickImage(source: ImageSource.camera);
 
-    // imageFile = await awaitImage?.readAsBytes();
-    // imageFile = await decodeImageFromList(imageFile);
+    imageFile = await awaitImage?.readAsBytes();
+    imageFile = await decodeImageFromList(imageFile);
 
-    // setState(() {
-    //   imageFile = imageFile;
-    //   pickedImage = awaitImage as File?;
-    // });
-
-    final pickedFile = await _picker.pickImage(source: ImageSource.camera);
     setState(() {
-      if (pickedFile != null) {
-        _imageFile = File(pickedFile.path);
-      } else {
-        // show snackbar
-        ScaffoldMessenger.of(context)
-            .showSnackBar(new SnackBar(content: new Text("No image selected")));
-        _imageFile = null;
-      }
-      Navigator.pop(context);
+      loading = true;
+      imageFile = imageFile;
+      print("Image File 0: $imageFile");
+      pickedImage = awaitImage;
+      print("Picked Image: $pickedImage");
     });
+
+    // final pickedFile = await _picker.pickImage(source: ImageSource.camera);
+    // setState(() {
+    //   if (pickedFile != null) {
+    //     _imageFile = File(pickedFile.path);
+    //     print("Image File: $_imageFile");
+    //   } else {
+    //     // show snackbar
+    //     ScaffoldMessenger.of(context)
+    //         .showSnackBar(new SnackBar(content: new Text("No image selected")));
+    //     _imageFile = null;
+    //     print("NULL Image File: $_imageFile");
+    //   }
+    //   // Navigator.pop(context);
+    // });
 
     File checkFile(pickedFileData) {
       File checkedFile;
       File file = File(pickedFileData.path);
+      print("FILE: $file");
       if (pickedFileData != null) {
         checkedFile = file;
+        print("CHECKED FILE: $checkedFile");
       } else {
         checkedFile = null as File;
+        print("NULL CHECKED FILE: $checkedFile");
       }
       return checkedFile;
     }
 
     FirebaseVisionImage visionImage =
-        FirebaseVisionImage.fromFile(checkFile(pickedFile));
+        FirebaseVisionImage.fromFile(checkFile(pickedImage));
 
     final FaceDetector faceDetector = FirebaseVision.instance.faceDetector();
 
@@ -95,88 +104,100 @@ class _ScanStudentState extends State<ScanStudent> {
 
     setState(() {
       isFaceDetected = true;
+      loading = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            "Scan Student",
-            style: textTheme(context).headline5!.copyWith(color: Colors.white),
+    print("IS FACE DETECTED: $isFaceDetected");
+    print("IMAGE FILE: $imageFile");
+    return ModalProgressHUD(
+      inAsyncCall: loading,
+      progressIndicator: Loader(AppColours.blue),
+      child: Scaffold(
+          appBar: AppBar(
+            title: Text(
+              "Scan Student",
+              style:
+                  textTheme(context).headline5!.copyWith(color: Colors.white),
+            ),
+            centerTitle: true,
+            elevation: 0.0,
+            backgroundColor: AppColours.blue,
           ),
-          centerTitle: true,
-          elevation: 0.0,
-          backgroundColor: AppColours.blue,
-        ),
-        key: scaffoldKey,
-        drawer: BuildDrawer(
-          role: "Invigilator",
-          item: "Scan Student",
-          color: AppColours.blue,
-          icon: Icons.person_search_rounded,
-        ),
-        body: SafeArea(
-          child: Stack(
-            children: [
-              Column(
-                children: <Widget>[
-                  const SizedBox(height: 50.0),
-                  isFaceDetected
-                      ? Center(
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(blurRadius: 20),
-                              ],
-                            ),
-                            margin: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-                            child: FittedBox(
-                              child: SizedBox(
-                                width: imageFile.width.toDouble(),
-                                height: imageFile.height.toDouble(),
-                                child: CustomPaint(
-                                  painter: FacePainter(
-                                      rect: rect, imageFile: imageFile),
+          key: scaffoldKey,
+          drawer: BuildDrawer(
+            role: "Invigilator",
+            item: "Scan Student",
+            color: AppColours.blue,
+            icon: Icons.person_search_rounded,
+          ),
+          body: SafeArea(
+            child: Stack(
+              children: [
+                Column(
+                  children: <Widget>[
+                    const SizedBox(height: 50.0),
+                    isFaceDetected
+                        ? Center(
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                boxShadow: [
+                                  BoxShadow(blurRadius: 20),
+                                ],
+                              ),
+                              margin: const EdgeInsets.fromLTRB(0, 0, 0, 8),
+                              child: FittedBox(
+                                child: SizedBox(
+                                  width: imageFile.width.toDouble(),
+                                  height: imageFile.height.toDouble(),
+                                  // width: 300,
+                                  // height: 300,
+                                  child: CustomPaint(
+                                    painter: FacePainter(
+                                        rect: rect, imageFile: imageFile),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        )
-                      : Container(),
-                  Center(
-                    child: TextButton.icon(
-                      icon: const Icon(
-                        Icons.photo_camera,
-                        size: 100,
+                          )
+                        : Container(),
+                    Center(
+                      child: TextButton.icon(
+                        icon: const Icon(
+                          Icons.photo_camera,
+                          size: 100,
+                        ),
+                        label: const Text(''),
+                        // textColor: Theme.of(context).primaryColor,
+                        onPressed: () async {
+                          pickImage();
+                        },
                       ),
-                      label: const Text(''),
-                      // textColor: Theme.of(context).primaryColor,
-                      onPressed: () async {
-                        pickImage();
-                      },
                     ),
-                  ),
-                ],
-              ),
-              Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 15, horizontal: 15),
-                    child: CustomButton(
+                  ],
+                ),
+                Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 15, horizontal: 15),
+                      child: CustomButton(
                         text: "Scan",
                         primaryColor: AppColours.blue,
-                        onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => FacePage()))),
-                  )),
-            ],
-          ),
-        ));
+                        onPressed: () {},
+                        // => Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //         builder: (context) => const FacePage()))
+                      ),
+                    )),
+              ],
+            ),
+          )),
+    );
   }
 }
 

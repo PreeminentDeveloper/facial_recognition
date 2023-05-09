@@ -18,6 +18,7 @@ class _FacePageState extends State<FacePage> {
 
   void _getImageAndDetectFaces() async {
     final imageFile = await _picker.pickImage(source: ImageSource.gallery);
+    print("Image File: $imageFile");
     final image = FirebaseVisionImage.fromFile(imageFile as File);
     final faceDetector = FirebaseVision.instance.faceDetector();
     final faces = await faceDetector.processImage(image);
@@ -31,13 +32,15 @@ class _FacePageState extends State<FacePage> {
 
   @override
   Widget build(BuildContext context) {
+    print("IMAGE FILE: $_imageFile");
+    print("FACES: $_faces");
     return Scaffold(
       body: ImageAndFaces(
         imageFile: _imageFile,
         faces: _faces,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _getImageAndDetectFaces,
+        onPressed: () => _getImageAndDetectFaces(),
         tooltip: "Pick an image",
         child: const Icon(Icons.add_a_photo),
       ),

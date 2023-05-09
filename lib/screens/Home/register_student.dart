@@ -35,16 +35,6 @@ class _RegisterStudentState extends State<RegisterStudent> {
   PlatformFile? pickedFile;
   final ImagePicker _picker = ImagePicker();
   bool isLoading = false;
-  String lastName = "";
-  String firstName = "";
-  String matricNumber = "";
-  String department = "";
-  String level = "";
-  String accademicSession = "";
-  String semester = "";
-  String courseName = "";
-  String courseCode = "";
-  String picture = "";
 
   submit(context) async {
     if (!_formKey.currentState!.validate()) {
@@ -59,18 +49,17 @@ class _RegisterStudentState extends State<RegisterStudent> {
         print("URL Download Link: $urlDownload");
         dynamic response = await UserHelper.saveStudentData(
             photoUrl: urlDownload,
-            lastName: lastName,
-            firstName: firstName,
-            matricNumber: matricNumber,
-            department: department,
-            level: level,
-            accademicSession: accademicSession,
-            semester: semester,
-            courseName: courseName,
-            courseCode: courseCode);
+            lastName: _lastNameController.text,
+            firstName: _firstNameController.text,
+            matricNumber: _matricNumberController.text,
+            department: _departmentController.text,
+            level: _levelController.text,
+            accademicSession: _accademicSessionController.text,
+            semester: _semesterController.text,
+            courseName: _courseNameControler.text,
+            courseCode: _courseCodeController.text);
         setState(() {
-          _imageFile = null;
-          urlDownload = "";
+          clearAllFields();
           isLoading = false;
         });
         print("Enrollment response: $response");
@@ -91,6 +80,19 @@ class _RegisterStudentState extends State<RegisterStudent> {
       customFlushBar.showErrorFlushBar(
           title: 'Error occured', body: '$e', context: context);
     }
+  }
+
+  clearAllFields() {
+    _imageFile = null;
+    _lastNameController.clear();
+    _firstNameController.clear();
+    _matricNumberController.clear();
+    _departmentController.clear();
+    _levelController.clear();
+    _accademicSessionController.clear();
+    _semesterController.clear();
+    _courseNameControler.clear();
+    _courseCodeController.clear();
   }
 
   Widget bottomSheet() {
@@ -232,279 +234,249 @@ class _RegisterStudentState extends State<RegisterStudent> {
     );
   }
 
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _matricNumberController = TextEditingController();
+  final TextEditingController _departmentController = TextEditingController();
+  final TextEditingController _levelController = TextEditingController();
+  final TextEditingController _accademicSessionController =
+      TextEditingController();
+  final TextEditingController _semesterController = TextEditingController();
+  final TextEditingController _courseNameControler = TextEditingController();
+  final TextEditingController _courseCodeController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    return isLoading
-        ? Loader(AppColours.green)
-        : Scaffold(
-            appBar: AppBar(
-              title: Text(
-                "Register Student",
-                style:
-                    textTheme(context).headline5!.copyWith(color: Colors.white),
-              ),
-              centerTitle: true,
-              elevation: 0.0,
-              backgroundColor: AppColours.green,
-            ),
-            key: scaffoldKey,
-            drawer: BuildDrawer(
-              role: "Admin",
-              item: "Student Enrollment",
-              color: AppColours.green,
-              icon: Icons.person,
-            ),
-            body: SafeArea(
-              child: ModalProgressHUD(
-                inAsyncCall: isLoading,
-                progressIndicator: Loader(AppColours.green),
-                child: Stack(
-                  children: <Widget>[
-                    Form(
-                        key: _formKey,
-                        child: SingleChildScrollView(
-                          child: Align(
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20),
-                              child: Column(
-                                // crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            "Register Student",
+            style: textTheme(context).headline5!.copyWith(color: Colors.white),
+          ),
+          centerTitle: true,
+          elevation: 0.0,
+          backgroundColor: AppColours.green,
+        ),
+        key: scaffoldKey,
+        drawer: BuildDrawer(
+          role: "Admin",
+          item: "Student Enrollment",
+          color: AppColours.green,
+          icon: Icons.person,
+        ),
+        body: SafeArea(
+          child: ModalProgressHUD(
+            inAsyncCall: isLoading,
+            progressIndicator: Loader(AppColours.green),
+            child: Stack(
+              children: <Widget>[
+                Form(
+                    key: _formKey,
+                    child: SingleChildScrollView(
+                      child: Align(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Column(
+                            // crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 20),
+                                child: imageProfile(),
+                              ),
+                              Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 20),
-                                    child: imageProfile(),
+                                    padding: const EdgeInsets.only(
+                                        top: 10, bottom: 10),
+                                    child: Text(
+                                      "Last Name",
+                                      style: textTheme(context).subtitle2,
+                                    ),
                                   ),
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            top: 10, bottom: 10),
-                                        child: Text(
-                                          "Last Name",
-                                          style: textTheme(context).subtitle2,
-                                        ),
-                                      ),
-                                      CustomInputField(
-                                          hintText: "Last Name",
-                                          validator: (String? value) {
-                                            if (value!.isEmpty) {
-                                              return 'Last Name cannot be empty';
-                                            }
-                                          },
-                                          onSave: (dynamic value) {
-                                            setState(() {
-                                              lastName = value;
-                                            });
-                                          },
-                                          textInputAction: TextInputAction.next,
-                                          keyboardType: TextInputType.name),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            top: 10, bottom: 10),
-                                        child: Text(
-                                          "First Name",
-                                          style: textTheme(context).subtitle2,
-                                        ),
-                                      ),
-                                      CustomInputField(
-                                          hintText: "First Name",
-                                          validator: (String? value) {
-                                            if (value!.isEmpty) {
-                                              return 'First Name cannot be empty';
-                                            }
-                                          },
-                                          onSave: (dynamic value) {
-                                            setState(() {
-                                              firstName = value;
-                                            });
-                                          },
-                                          textInputAction: TextInputAction.next,
-                                          keyboardType: TextInputType.name),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            top: 10, bottom: 10),
-                                        child: Text(
-                                          "Matric Number",
-                                          style: textTheme(context).subtitle2,
-                                        ),
-                                      ),
-                                      CustomInputField(
-                                          hintText: "Matric Number",
-                                          validator: (String? value) {
-                                            if (value!.isEmpty) {
-                                              return 'Matric Number cannot be empty';
-                                            }
-                                          },
-                                          onSave: (dynamic value) {
-                                            setState(() {
-                                              matricNumber = value;
-                                            });
-                                          },
-                                          textInputAction: TextInputAction.next,
-                                          keyboardType: TextInputType.text),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            top: 10, bottom: 10),
-                                        child: Text(
-                                          "Department",
-                                          style: textTheme(context).subtitle2,
-                                        ),
-                                      ),
-                                      CustomInputField(
-                                          hintText: "Department",
-                                          validator: (String? value) {
-                                            if (value!.isEmpty) {
-                                              return 'Department cannot be empty';
-                                            }
-                                          },
-                                          onSave: (dynamic value) {
-                                            setState(() {
-                                              department = value;
-                                            });
-                                          },
-                                          textInputAction: TextInputAction.next,
-                                          keyboardType: TextInputType.text),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            top: 10, bottom: 10),
-                                        child: Text(
-                                          "Level",
-                                          style: textTheme(context).subtitle2,
-                                        ),
-                                      ),
-                                      CustomInputField(
-                                          hintText: "Level",
-                                          validator: (String? value) {
-                                            if (value!.isEmpty) {
-                                              return 'Level cannot be empty';
-                                            }
-                                          },
-                                          onSave: (dynamic value) {
-                                            setState(() {
-                                              level = value;
-                                            });
-                                          },
-                                          textInputAction: TextInputAction.next,
-                                          keyboardType: TextInputType.text),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            top: 10, bottom: 10),
-                                        child: Text(
-                                          "Accademic Session",
-                                          style: textTheme(context).subtitle2,
-                                        ),
-                                      ),
-                                      CustomInputField(
-                                          hintText: "Accademic Session",
-                                          validator: (String? value) {
-                                            if (value!.isEmpty) {
-                                              return 'Accademic Session cannot be empty';
-                                            }
-                                          },
-                                          onSave: (dynamic value) {
-                                            setState(() {
-                                              accademicSession = value;
-                                            });
-                                          },
-                                          textInputAction: TextInputAction.next,
-                                          keyboardType: TextInputType.text),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            top: 10, bottom: 10),
-                                        child: Text(
-                                          "Semester",
-                                          style: textTheme(context).subtitle2,
-                                        ),
-                                      ),
-                                      CustomInputField(
-                                          hintText: "Semester",
-                                          validator: (String? value) {
-                                            if (value!.isEmpty) {
-                                              return 'Semester cannot be empty';
-                                            }
-                                          },
-                                          onSave: (dynamic value) {
-                                            setState(() {
-                                              semester = value;
-                                            });
-                                          },
-                                          textInputAction: TextInputAction.next,
-                                          keyboardType: TextInputType.text),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            top: 10, bottom: 10),
-                                        child: Text(
-                                          "Course Name",
-                                          style: textTheme(context).subtitle2,
-                                        ),
-                                      ),
-                                      CustomInputField(
-                                          hintText: "Course Name",
-                                          validator: (String? value) {
-                                            if (value!.isEmpty) {
-                                              return 'Course Name cannot be empty';
-                                            }
-                                          },
-                                          onSave: (dynamic value) {
-                                            setState(() {
-                                              courseName = value;
-                                            });
-                                          },
-                                          textInputAction: TextInputAction.next,
-                                          keyboardType: TextInputType.name),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            top: 10, bottom: 10),
-                                        child: Text(
-                                          "Course Code",
-                                          style: textTheme(context).subtitle2,
-                                        ),
-                                      ),
-                                      CustomInputField(
-                                          hintText: "Course Code",
-                                          validator: (String? value) {
-                                            if (value!.isEmpty) {
-                                              return 'Course Code cannot be empty';
-                                            }
-                                          },
-                                          onSave: (dynamic value) {
-                                            setState(() {
-                                              courseCode = value;
-                                            });
-                                          },
-                                          textInputAction: TextInputAction.next,
-                                          keyboardType: TextInputType.text),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 10),
-                                        child: CustomButton(
-                                            text: "Submit",
-                                            primaryColor: AppColours.green,
-                                            onPressed: () {
-                                              submit(context);
-                                            }),
-                                      ),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                    ],
-                                  )
+                                  CustomInputField(
+                                      hintText: "Last Name",
+                                      validator: (String? value) {
+                                        if (value!.isEmpty) {
+                                          return 'Last Name cannot be empty';
+                                        }
+                                      },
+                                      controller: _lastNameController,
+                                      textInputAction: TextInputAction.next,
+                                      keyboardType: TextInputType.name),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 10, bottom: 10),
+                                    child: Text(
+                                      "First Name",
+                                      style: textTheme(context).subtitle2,
+                                    ),
+                                  ),
+                                  CustomInputField(
+                                      hintText: "First Name",
+                                      validator: (String? value) {
+                                        if (value!.isEmpty) {
+                                          return 'First Name cannot be empty';
+                                        }
+                                      },
+                                      controller: _firstNameController,
+                                      textInputAction: TextInputAction.next,
+                                      keyboardType: TextInputType.name),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 10, bottom: 10),
+                                    child: Text(
+                                      "Matric Number",
+                                      style: textTheme(context).subtitle2,
+                                    ),
+                                  ),
+                                  CustomInputField(
+                                      hintText: "Matric Number",
+                                      validator: (String? value) {
+                                        if (value!.isEmpty) {
+                                          return 'Matric Number cannot be empty';
+                                        }
+                                      },
+                                      controller: _matricNumberController,
+                                      textInputAction: TextInputAction.next,
+                                      keyboardType: TextInputType.text),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 10, bottom: 10),
+                                    child: Text(
+                                      "Department",
+                                      style: textTheme(context).subtitle2,
+                                    ),
+                                  ),
+                                  CustomInputField(
+                                      hintText: "Department",
+                                      validator: (String? value) {
+                                        if (value!.isEmpty) {
+                                          return 'Department cannot be empty';
+                                        }
+                                      },
+                                      controller: _departmentController,
+                                      textInputAction: TextInputAction.next,
+                                      keyboardType: TextInputType.text),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 10, bottom: 10),
+                                    child: Text(
+                                      "Level",
+                                      style: textTheme(context).subtitle2,
+                                    ),
+                                  ),
+                                  CustomInputField(
+                                      hintText: "Level",
+                                      validator: (String? value) {
+                                        if (value!.isEmpty) {
+                                          return 'Level cannot be empty';
+                                        }
+                                      },
+                                      controller: _levelController,
+                                      textInputAction: TextInputAction.next,
+                                      keyboardType: TextInputType.text),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 10, bottom: 10),
+                                    child: Text(
+                                      "Accademic Session",
+                                      style: textTheme(context).subtitle2,
+                                    ),
+                                  ),
+                                  CustomInputField(
+                                      hintText: "Accademic Session",
+                                      validator: (String? value) {
+                                        if (value!.isEmpty) {
+                                          return 'Accademic Session cannot be empty';
+                                        }
+                                      },
+                                      controller: _accademicSessionController,
+                                      textInputAction: TextInputAction.next,
+                                      keyboardType: TextInputType.text),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 10, bottom: 10),
+                                    child: Text(
+                                      "Semester",
+                                      style: textTheme(context).subtitle2,
+                                    ),
+                                  ),
+                                  CustomInputField(
+                                      hintText: "Semester",
+                                      validator: (String? value) {
+                                        if (value!.isEmpty) {
+                                          return 'Semester cannot be empty';
+                                        }
+                                      },
+                                      controller: _semesterController,
+                                      textInputAction: TextInputAction.next,
+                                      keyboardType: TextInputType.text),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 10, bottom: 10),
+                                    child: Text(
+                                      "Course Name",
+                                      style: textTheme(context).subtitle2,
+                                    ),
+                                  ),
+                                  CustomInputField(
+                                      hintText: "Course Name",
+                                      validator: (String? value) {
+                                        if (value!.isEmpty) {
+                                          return 'Course Name cannot be empty';
+                                        }
+                                      },
+                                      controller: _courseNameControler,
+                                      textInputAction: TextInputAction.next,
+                                      keyboardType: TextInputType.name),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 10, bottom: 10),
+                                    child: Text(
+                                      "Course Code",
+                                      style: textTheme(context).subtitle2,
+                                    ),
+                                  ),
+                                  CustomInputField(
+                                      hintText: "Course Code",
+                                      validator: (String? value) {
+                                        if (value!.isEmpty) {
+                                          return 'Course Code cannot be empty';
+                                        }
+                                      },
+                                      controller: _courseCodeController,
+                                      textInputAction: TextInputAction.next,
+                                      keyboardType: TextInputType.text),
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 10),
+                                    child: CustomButton(
+                                        text: "Submit",
+                                        primaryColor: AppColours.green,
+                                        onPressed: () {
+                                          submit(context);
+                                        }),
+                                  ),
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
                                 ],
-                              ),
-                            ),
+                              )
+                            ],
                           ),
-                        )),
-                  ],
-                ),
-              ),
-            ));
+                        ),
+                      ),
+                    )),
+              ],
+            ),
+          ),
+        ));
   }
 }
